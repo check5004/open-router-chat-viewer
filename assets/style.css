@@ -1,0 +1,85 @@
+:root{
+	--bg:#0b0f14;
+	--bg-elev:#121821;
+	--text:#e7eef7;
+	--muted:#a9b4c0;
+	--brand:#4cc2ff;
+	--accent:#7bf1a8;
+	--danger:#ff7a7a;
+	--border:#22303f;
+	--chip:#1b2430;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+	margin:0; background:var(--bg); color:var(--text);
+	font:14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.app-header{
+	display:flex; align-items:center; justify-content:space-between;
+	padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg-elev);
+}
+.branding{font-weight:700; letter-spacing:.2px}
+.controls{display:flex; gap:8px; align-items:center}
+.file-button{display:inline-flex; align-items:center; gap:8px; background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:6px 10px; cursor:pointer}
+.file-button:hover{outline:1px solid var(--brand)}
+button{
+	background:var(--brand); color:#001018; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600
+}
+button:disabled{opacity:.5; cursor:not-allowed}
+
+.app{display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 52px)}
+.sidebar{border-right:1px solid var(--border); padding:12px; background:var(--bg-elev)}
+.sidebar h2{margin:8px 0 12px 0; font-size:13px; color:var(--muted); letter-spacing:.4px}
+.model-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px}
+.model-item{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px; border:1px solid var(--border); background:var(--chip); border-radius:10px; cursor:pointer}
+.model-item:hover{outline:1px solid var(--brand)}
+.model-item.selected{outline:2px solid var(--brand)}
+.model-name{font-weight:600}
+.model-meta{color:var(--muted); font-size:12px}
+.model-summary{margin-top:12px; border-top:1px solid var(--border); padding-top:12px; font-size:13px}
+.summary-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+.summary-grid .card{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px}
+
+.content{position:relative; padding:0}
+.placeholder{padding:28px; color:var(--muted)}
+.chat{display:flex; flex-direction:column; gap:16px; padding:16px}
+.msg{display:flex; gap:12px}
+.msg .avatar{width:28px; height:28px; border-radius:50%; background:#1e2a38; display:inline-flex; align-items:center; justify-content:center; font-size:12px; color:var(--muted)}
+.msg .bubble{flex:1; background:var(--bg-elev); border:1px solid var(--border); border-radius:12px; padding:12px}
+.msg.user .bubble{border-left:3px solid var(--accent)}
+.msg.assistant .bubble{border-left:3px solid var(--brand)}
+.msg-header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.msg-header .name{font-weight:700}
+.msg-header .meta{color:var(--muted); font-size:12px}
+
+.attachments{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+.attachment{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px; max-width:100%}
+.attachment img{max-width:360px; height:auto; display:block; border-radius:6px}
+.attachment details{max-width:720px}
+.attachment object, .attachment iframe{width:100%; height:480px; border:none; background:#fff}
+
+.md{line-height:1.7}
+.md h1,.md h2,.md h3{margin:1.2em 0 .6em}
+.md pre{background:#0a0f16; border:1px solid var(--border); padding:10px; border-radius:8px; overflow:auto}
+.md code{background:#0a0f16; padding:2px 4px; border-radius:4px}
+.md table{border-collapse:collapse; width:100%; overflow:auto; display:block}
+.md th,.md td{border:1px solid var(--border); padding:6px 8px}
+
+.thinking{margin-top:10px}
+.thinking .note{color:var(--muted); font-size:12px}
+
+/* Status in header (simple: dot + message) */
+.status-bar{display:flex; align-items:center; gap:8px; padding:0}
+.status-bar .dot{width:10px; height:10px; border-radius:50%; background:var(--muted); display:inline-block}
+.status-bar .dot.active{background:var(--accent)}
+
+@media (max-width: 900px){
+	.app{grid-template-columns:1fr}
+	.sidebar{order:2}
+	.content{order:1}
+}
+
+
