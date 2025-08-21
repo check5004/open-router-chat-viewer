@@ -339,12 +339,12 @@
 	// ---------- Standalone assets (inline for export) ----------
 	const STANDALONE_CSS = `
 	:root{--bg:#0b0f14;--bg-elev:#121821;--text:#e7eef7;--muted:#a9b4c0;--brand:#4cc2ff;--accent:#7bf1a8;--border:#22303f;--chip:#1b2430}
-	*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+	*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";display:flex;flex-direction:column;height:100vh;overflow:hidden}
 	.app-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg-elev)}
 	.branding{font-weight:700;letter-spacing:.2px}.controls{display:flex;gap:8px;align-items:center}
 	button{background:var(--brand);color:#001018;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600}button:disabled{opacity:.5;cursor:not-allowed}
-	.app{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 52px)}
-	.sidebar{border-right:1px solid var(--border);padding:12px;background:var(--bg-elev)}
+	.app{display:grid;grid-template-columns:280px 1fr;flex:1;min-height:0;overflow:hidden}
+	.sidebar{border-right:1px solid var(--border);padding:12px;background:var(--bg-elev);height:100%;overflow:auto}
 	.sidebar h2{margin:8px 0 12px 0;font-size:13px;color:var(--muted);letter-spacing:.4px}
 	.model-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
 	.model-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border:1px solid var(--border);background:var(--chip);border-radius:10px;cursor:pointer}
@@ -352,7 +352,12 @@
 	.model-name{font-weight:600}.model-meta{color:var(--muted);font-size:12px}
 	.model-summary{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:13px}
 	.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.summary-grid .card{background:var(--chip);border:1px solid var(--border);border-radius:8px;padding:8px}
-	.content{padding:0}.chat{display:flex;flex-direction:column;gap:16px;padding:16px}
+	.content{padding:0;height:100%;overflow:auto}.chat{display:flex;flex-direction:column;gap:16px;padding:16px}
+	.content{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+	.content::-webkit-scrollbar{width:10px}
+	.content::-webkit-scrollbar-track{background:transparent}
+	.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+	.content:hover::-webkit-scrollbar-thumb{background:var(--brand)}
 	.msg{display:flex;gap:12px}.avatar{width:28px;height:28px;border-radius:50%;background:#1e2a38;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
 	.bubble{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:12px}
 	.msg.user .bubble{border-left:3px solid var(--accent)}.msg.assistant .bubble{border-left:3px solid var(--brand)}

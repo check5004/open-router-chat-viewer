@@ -15,6 +15,7 @@ html,body{height:100%}
 body{
 	margin:0; background:var(--bg); color:var(--text);
 	font:14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+	display:flex; flex-direction:column; height:100vh; overflow:hidden
 }
 
 .app-header{
@@ -30,8 +31,8 @@ button{
 }
 button:disabled{opacity:.5; cursor:not-allowed}
 
-.app{display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 52px)}
-.sidebar{border-right:1px solid var(--border); padding:12px; background:var(--bg-elev)}
+.app{display:grid; grid-template-columns:280px 1fr; flex:1; min-height:0; overflow:hidden}
+.sidebar{border-right:1px solid var(--border); padding:12px; background:var(--bg-elev); height:100%; overflow:auto}
 .sidebar h2{margin:8px 0 12px 0; font-size:13px; color:var(--muted); letter-spacing:.4px}
 .model-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px}
 .model-item{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px; border:1px solid var(--border); background:var(--chip); border-radius:10px; cursor:pointer}
@@ -43,7 +44,14 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .summary-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
 .summary-grid .card{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px}
 
-.content{position:relative; padding:0}
+.content{position:relative; padding:0; height:100%; overflow:auto}
+
+/* Chat area scrollbar styling */
+.content{scrollbar-width:thin; scrollbar-color:var(--border) transparent}
+.content::-webkit-scrollbar{width:10px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border); border-radius:8px}
+.content:hover::-webkit-scrollbar-thumb{background:var(--brand)}
 .placeholder{padding:28px; color:var(--muted)}
 .chat{display:flex; flex-direction:column; gap:16px; padding:16px}
 .msg{display:flex; gap:12px}
