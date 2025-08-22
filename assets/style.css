@@ -1,33 +1,33 @@
 :root{
-	--bg:#0b0f14;
-	--bg-elev:#121821;
-	--text:#e7eef7;
-	--muted:#a9b4c0;
-	--brand:#4cc2ff;
-	--accent:#7bf1a8;
-	--danger:#ff7a7a;
-	--border:#22303f;
-	--chip:#1b2430;
+  --bg:#0b0f14;
+  --bg-elev:#121821;
+  --text:#e7eef7;
+  --muted:#a9b4c0;
+  --brand:#4cc2ff;
+  --accent:#7bf1a8;
+  --danger:#ff7a7a;
+  --border:#22303f;
+  --chip:#1b2430;
 }
 
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-	margin:0; background:var(--bg); color:var(--text);
-	font:14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-	display:flex; flex-direction:column; height:100vh; overflow:hidden
+  margin:0; background:var(--bg); color:var(--text);
+  font:14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  display:flex; flex-direction:column; height:100vh; overflow:hidden
 }
 
 .app-header{
-	display:flex; align-items:center; justify-content:space-between;
-	padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg-elev);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg-elev);
 }
 .branding{font-weight:700; letter-spacing:.2px}
 .controls{display:flex; gap:8px; align-items:center}
 .file-button{display:inline-flex; align-items:center; gap:8px; background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:6px 10px; cursor:pointer}
 .file-button:hover{outline:1px solid var(--brand)}
 button{
-	background:var(--brand); color:#001018; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600
+  background:var(--brand); color:#001018; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600
 }
 button:disabled{opacity:.5; cursor:not-allowed}
 
@@ -89,9 +89,9 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .status-bar .dot.active{background:var(--accent)}
 
 @media (max-width: 900px){
-	.app{grid-template-columns:1fr}
-	.sidebar{order:2}
-	.content{order:1}
+  .app{grid-template-columns:1fr}
+  .sidebar{order:2}
+  .content{order:1}
 }
 
 
