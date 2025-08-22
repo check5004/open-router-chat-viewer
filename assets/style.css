@@ -31,6 +31,10 @@ button{
 }
 button:disabled{opacity:.5; cursor:not-allowed}
 
+/* Header GitHub icon button */
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid var(--border); background:var(--chip); border-radius:8px; color:var(--text); text-decoration:none}
+.icon-btn:hover{outline:1px solid var(--brand); color:var(--brand)}
+
 .app{display:grid; grid-template-columns:280px 1fr; flex:1; min-height:0; overflow:hidden}
 .sidebar{border-right:1px solid var(--border); padding:12px; background:var(--bg-elev); height:100%; overflow:auto}
 .sidebar h2{margin:8px 0 12px 0; font-size:13px; color:var(--muted); letter-spacing:.4px}
