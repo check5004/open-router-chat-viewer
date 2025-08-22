@@ -419,7 +419,7 @@
   .msg{display:flex;gap:12px}.avatar{width:28px;height:28px;border-radius:50%;background:#1e2a38;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
   .bubble{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:12px}
   .msg.user .bubble{border-left:3px solid var(--accent)}.msg.assistant .bubble{border-left:3px solid var(--brand)}
-  .msg-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.msg-header .name{font-weight:700}.msg-header .meta{color:var(--muted);font-size:12px}
+  .msg-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;background:var(--chip);border:1px solid var(--border);border-radius:8px;padding:8px 10px}.msg-header .name{font-weight:700}.msg-header .meta{color:var(--muted);font-size:12px}
   .meta-actions{display:flex;align-items:center;gap:8px}
   .meta-actions .copy-btn{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .meta-actions .copy-btn:hover{outline:1px solid var(--brand)}
@@ -435,7 +435,7 @@
   .attachment object,.attachment iframe{width:100%;height:480px;border:none;background:#fff}
   .md pre{background:#0a0f16;border:1px solid var(--border);padding:10px;border-radius:8px;overflow:auto}
   .md code{background:#0a0f16;padding:2px 4px;border-radius:4px}.md table{border-collapse:collapse;width:100%;display:block;overflow:auto}
-  .md th,.md td{border:1px solid var(--border);padding:6px 8px}.thinking{margin-top:10px}.thinking .note{color:var(--muted);font-size:12px}
+  .md th,.md td{border:1px solid var(--border);padding:6px 8px}.thinking{margin-top:10px}.thinking details{background:var(--chip);border:1px solid var(--border);border-radius:8px;padding:8px}.thinking details > summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}.thinking details > summary::-webkit-details-marker{display:none}.thinking details[open]{outline:1px solid var(--brand)}.thinking .note{color:var(--muted);font-size:12px;margin-top:6px}.thinking details > .md{margin-top:6px}
   @media (max-width:900px){.app{grid-template-columns:1fr}.sidebar{order:2}.content{order:1}}
   `;
 

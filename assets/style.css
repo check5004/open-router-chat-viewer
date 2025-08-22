@@ -68,7 +68,7 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .msg .bubble{flex:1; background:var(--bg-elev); border:1px solid var(--border); border-radius:12px; padding:12px}
 .msg.user .bubble{border-left:3px solid var(--accent)}
 .msg.assistant .bubble{border-left:3px solid var(--brand)}
-.msg-header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.msg-header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px 10px}
 .msg-header .name{font-weight:700}
 .msg-header .meta{color:var(--muted); font-size:12px}
 
@@ -100,7 +100,12 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .md a:focus-visible{box-shadow:0 0 0 3px rgba(76,194,255,.35)}
 
 .thinking{margin-top:10px}
-.thinking .note{color:var(--muted); font-size:12px}
+.thinking details{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px}
+.thinking details > summary{cursor:pointer; font-weight:600; list-style:none; display:flex; align-items:center; gap:8px}
+.thinking details > summary::-webkit-details-marker{display:none}
+.thinking details[open]{outline:1px solid var(--brand)}
+.thinking .note{color:var(--muted); font-size:12px; margin-top:6px}
+.thinking details > .md{margin-top:6px}
 
 /* Status in header (simple: dot + message) */
 .status-bar{display:flex; align-items:center; gap:8px; padding:0}
