@@ -18,6 +18,11 @@ body{
   display:flex; flex-direction:column; height:100vh; overflow:hidden
 }
 
+/* Global link styles for dark theme readability */
+a{color:var(--brand); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1.5px}
+a:visited{color:var(--brand)}
+a:hover, a:focus-visible{color:var(--brand); text-decoration-thickness:2px; outline:0}
+
 .app-header{
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg-elev);
@@ -79,6 +84,12 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .md code{background:#0a0f16; padding:2px 4px; border-radius:4px}
 .md table{border-collapse:collapse; width:100%; overflow:auto; display:block}
 .md th,.md td{border:1px solid var(--border); padding:6px 8px}
+
+/* Markdown content links */
+.md a{color:var(--brand); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1.5px; transition:color .15s ease, background-color .15s ease, text-decoration-thickness .15s ease, box-shadow .15s ease}
+.md a:visited{color:var(--brand)}
+.md a:hover,.md a:focus-visible{background:rgba(76,194,255,.18); color:#9dcce2; border-radius:3px; text-decoration-thickness:2px; outline:0}
+.md a:focus-visible{box-shadow:0 0 0 3px rgba(76,194,255,.35)}
 
 .thinking{margin-top:10px}
 .thinking .note{color:var(--muted); font-size:12px}
