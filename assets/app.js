@@ -229,12 +229,19 @@
       <div class="bubble">
         <div class="msg-header">
           <div class="name">ユーザー</div>
-          <div class="meta">${fmtDate(msg.createdAt)}</div>
+          <div class="meta-actions"><div class="meta">${fmtDate(msg.createdAt)}</div><button class="copy-btn" type="button" aria-label="Markdownをコピー" title="Markdownをコピー">${copyIconSvg()}</button></div>
         </div>
         <div class="md">${renderMarkdown(msg.content || "")}</div>
         ${renderAttachments(msg.attachments || [])}
       </div>
     `;
+    const btn = el.querySelector(".copy-btn");
+    if(btn){
+      btn.addEventListener("click", async () => {
+        const text = String(msg.content || "");
+        await copyMarkdownToClipboard(text, btn);
+      });
+    }
     return el;
   }
 
@@ -256,13 +263,20 @@
       <div class="bubble">
         <div class="msg-header">
           <div class="name">${escapeHtml(name)}</div>
-          <div class="meta">${escapeHtml(provider)} ・ ${tokens? (tokens.toLocaleString()+" tok") : ""} ・ ${cost? ("$"+formatCost(cost)) : ""} ・ ${rdur? formatMs(rdur):""}</div>
+          <div class="meta-actions"><div class="meta">${escapeHtml(provider)} ・ ${tokens? (tokens.toLocaleString()+" tok") : ""} ・ ${cost? ("$"+formatCost(cost)) : ""} ・ ${rdur? formatMs(rdur):""}</div><button class="copy-btn" type="button" aria-label="Thinkingを除いたMarkdownをコピー" title="Thinkingを除いたMarkdownをコピー">${copyIconSvg()}</button></div>
         </div>
         ${hasReasoning ? `<div class="thinking"><details><summary>Thinking を表示</summary><div class="note">内部思考（参考表示・初期は非表示）</div><div class="md">${renderMarkdown(msg.reasoning)}</div></details></div>` : ""}
         <div class="md">${renderMarkdown(msg.content || "")}</div>
         ${renderAttachments(msg.attachments || [])}
       </div>
     `;
+    const btn = el.querySelector(".copy-btn");
+    if(btn){
+      btn.addEventListener("click", async () => {
+        const text = String(msg.content || "");
+        await copyMarkdownToClipboard(text, btn);
+      });
+    }
     return el;
   }
 
@@ -301,6 +315,7 @@
     const js = STANDALONE_JS.trim();
     const title = (json.title ? escapeHtml(json.title) + " - " : "") + "OpenRouter Chat Viewer";
     const data = JSON.stringify(json);
+    const dataEscaped = escapeForHtmlScriptContent(data);
     return `<!doctype html>
     <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>
     <style>${css}</style>
@@ -312,7 +327,7 @@
     <div class="controls"><button id="export-btn" disabled>HTMLをダウンロード</button></div></header>
     <main class="app"><aside class="sidebar"><h2>モデル</h2><ul id="model-list" class="model-list"></ul><div id="model-summary" class="model-summary"></div></aside>
     <section class="content"><div id="chat" class="chat"></div></section></main>
-    <script>window.__EXPORTED_JSON__=${data}</script>
+    <script id="data-json" type="application/json">${dataEscaped}</script>
     <script>${js}</script>
     </body></html>`;
   }
@@ -325,6 +340,48 @@
     }catch(e){ return `<pre>${escapeHtml(md)}</pre>`; }
   }
 
+  // ---------- Clipboard utilities ----------
+  async function copyMarkdownToClipboard(markdownText, btn){
+    const text = String(markdownText || "");
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+      }else{
+        legacyCopy(text);
+      }
+      flashCopied(btn);
+    }catch{
+      try{ legacyCopy(text); flashCopied(btn); }catch{}
+    }
+  }
+
+  function legacyCopy(text){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    ta.style.left = "-1000px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+
+  function flashCopied(btn){
+    if(!btn) return;
+    const prev = btn.textContent;
+    btn.disabled = true;
+    const prevHtml = btn.innerHTML;
+    btn.setAttribute("data-prev-label", prev);
+    btn.innerHTML = '<span class="copied">✔</span>';
+    setTimeout(() => { btn.innerHTML = prevHtml; btn.disabled = false; }, 1200);
+  }
+
+  function copyIconSvg(){
+    return '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+  }
+
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, s => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s]));
   }
@@ -335,6 +392,7 @@
   function parseDataUrlMime(dataUrl){ const m = /^data:([^;,]+)[;,]/.exec(dataUrl||""); return m? m[1] : null; }
   function guessMimeFromName(name){ if(/\.pdf$/i.test(name)) return "application/pdf"; if(/\.(png|jpg|jpeg|gif|webp|svg)$/i.test(name)) return "image/*"; return null; }
   function toSlug(s){ return String(s).trim().toLowerCase().replace(/[^a-z0-9\-\_]+/g,'-').replace(/-+/g,'-').replace(/^-|-$|_/g,''); }
+  function escapeForHtmlScriptContent(s){ return String(s).replace(/<\/?script/gi, function(m){ return m.replace(/\//, '\\/'); }); }
 
   // ---------- Standalone assets (inline for export) ----------
   const STANDALONE_CSS = `
@@ -362,6 +420,16 @@
   .bubble{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:12px}
   .msg.user .bubble{border-left:3px solid var(--accent)}.msg.assistant .bubble{border-left:3px solid var(--brand)}
   .msg-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.msg-header .name{font-weight:700}.msg-header .meta{color:var(--muted);font-size:12px}
+  .meta-actions{display:flex;align-items:center;gap:8px}
+  .meta-actions .copy-btn{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .meta-actions .copy-btn:hover{outline:1px solid var(--brand)}
+  .meta-actions .copy-btn:disabled{opacity:.6;cursor:not-allowed}
+  .meta-actions .copy-btn .icon{display:block}
+  .meta-actions .copy-btn .copied{font-weight:700;color:var(--accent);font-size:12px;line-height:1}
+  .meta-actions{display:flex;align-items:center;gap:8px}
+  .meta-actions .copy-btn{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-weight:600;font-size:12px;cursor:pointer}
+  .meta-actions .copy-btn:hover{outline:1px solid var(--brand)}
+  .meta-actions .copy-btn:disabled{opacity:.6;cursor:not-allowed}
   .attachments{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.attachment{background:var(--chip);border:1px solid var(--border);border-radius:8px;padding:8px;max-width:100%}
   .attachment img{max-width:360px;height:auto;display:block;border-radius:6px}.attachment details{max-width:720px}
   .attachment object,.attachment iframe{width:100%;height:480px;border:none;background:#fff}
@@ -371,23 +439,37 @@
   @media (max-width:900px){.app{grid-template-columns:1fr}.sidebar{order:2}.content{order:1}}
   `;
 
-  const STANDALONE_JS = '(function(){"use strict";var state={};function escapeHtml(s){return String(s).replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}'
-    + 'function formatCost(n){return(Number(n)||0).toFixed(6);}function formatMs(ms){if(!ms)return"";return(ms/1000).toFixed(1)+"s";}'
-    + 'function parseMime(d){var m=/^data:([^;,]+)[;,]/.exec(d||"");return m?m[1]:null;}function guessMime(n){if(/\\.pdf$/i.test(n))return"application/pdf";if(/\\.(png|jpg|jpeg|gif|webp|svg)$/i.test(n))return"image/*";return null;}'
-    + 'function deriveKey(msg,chars){return(msg.metadata&&msg.metadata.variantSlug)||(chars[msg.characterId]&&chars[msg.characterId].modelInfo&&chars[msg.characterId].modelInfo.slug)||(chars[msg.characterId]&&chars[msg.characterId].model)||null;}'
-    + 'function mdToHtml(md){try{var html=window.marked.parse(md||"",{mangle:false,headerIds:false});return DOMPurify.sanitize(html);}catch(e){return"<pre>"+escapeHtml(md||"")+"</pre>";}}'
-    + 'function renderAttach(a){var data=a.content||"";var name=a.name||"file";var mime=parseMime(data)||guessMime(name)||"application/octet-stream";if(mime.startsWith("image/")){return"<div class=attachment><div>"+escapeHtml(name)+"</div><img src=\\""+data+"\\" alt=\\""+escapeHtml(name)+"\\"></div>";}if(mime==="application/pdf"){return"<div class=attachment><details><summary>"+escapeHtml(name)+"（PDF プレビュー）</summary><object data=\\""+data+"\\" type=\\"application/pdf\\"></object><div style=margin-top:6px><a href=\\""+data+"\\" download=\\""+escapeHtml(name)+"\\">ダウンロード</a></div></details></div>";}return"<div class=attachment><div>"+escapeHtml(name)+"</div><a href=\\""+data+"\\" download=\\""+escapeHtml(name)+"\\">ダウンロード</a></div>";}'
-    + 'function summarize(modelKey,msgs,chars){var totalCost=0,totalTokens=0,count=0,totalR=0;for(var i=0;i<msgs.length;i++){var m=msgs[i];if(m.type!=="assistant")continue;var k=deriveKey(m,chars);if(k!==modelKey)continue;count++;totalCost+=Number((m.metadata&&m.metadata.cost)||0)||0;totalTokens+=Number((m.metadata&&m.metadata.tokensCount)||0)||0;totalR+=Number((m.metadata&&m.metadata.reasoningDuration)||0)||0;}return{totalCost:totalCost,totalTokens:totalTokens,count:count,totalReasoningMs:totalR};}\n'
-    + 'function render(json){ state.json=json; const chars=json.characters||{}; const all=Object.values(json.messages||{}); all.sort(function(a,b){const ta=Date.parse(a.createdAt||0)||0; const tb=Date.parse(b.createdAt||0)||0; if(ta!==tb) return ta-tb; return String(a.id).localeCompare(String(b.id));}); const users=all.filter(function(m){return m.type==="user"||m.characterId==="USER";}); const map=new Map(); const models=new Map(); for(const m of all){ if(m.type!=="assistant") continue; const pid=m.parentMessageId; if(!pid) continue; const k=deriveKey(m, chars); if(!k) continue; if(!map.has(pid)) map.set(pid, new Map()); map.get(pid).set(k, m); const char=chars[m.characterId]||{}; const info=char.modelInfo||{}; const ep=char.endpoint||{}; const slug=k; const prov=(slug&&slug.split("/")[0]) || (ep.provider_name||"") || ((m.metadata&&m.metadata.provider)||""); models.set(k, {key:k, name:info.name||k, shortName:info.short_name||k, provider:prov}); }\n'
-    + '// sidebar\n'
-    + 'const list=document.getElementById("model-list"); list.innerHTML=""; const mlist=Array.from(models.values()).map(function(m){ return { key:m.key, name:m.name, shortName:m.shortName, provider:m.provider, summary:summarize(m.key, all, chars) }; }).sort(function(a,b){return a.name.localeCompare(b.name);}); const summaryEl=document.getElementById("model-summary"); let current=(mlist[0]&&mlist[0].key)||null; function paintSummary(){ const m=mlist.find(function(x){return x.key===current;}); if(!m){ summaryEl.textContent=""; return;} const s=m.summary; summaryEl.innerHTML="<div class=summary-grid><div class=card><div>総コスト</div><div><strong>$"+((Number(s.totalCost)||0).toFixed(6))+"</strong></div></div><div class=card><div>トークン</div><div><strong>"+s.totalTokens.toLocaleString()+"</strong></div></div><div class=card><div>応答数</div><div><strong>"+s.count+"</strong></div></div><div class=card><div>推論時間</div><div><strong>"+(((s.totalReasoningMs||0)/1000).toFixed(1))+"s</strong></div></div></div>"; }\n'
-    + 'function select(k){ current=k; Array.from(list.querySelectorAll(".model-item")).forEach(function(li){ li.classList.toggle("selected", li.dataset.key===k); }); paintSummary(); paint(); }\n'
-    + 'for(const m of mlist){ const li=document.createElement("li"); li.className="model-item"; li.dataset.key=m.key; li.innerHTML="<div class=model-name>"+escapeHtml(m.shortName||m.name)+"</div><div class=model-meta>"+escapeHtml(m.provider||"")+"</div>"; li.onclick=function(){ select(m.key); }; list.appendChild(li); }\n'
-    + '// chat\n'
-    + 'const chat=document.getElementById("chat"); function paint(){ chat.innerHTML=""; for(const u of users){ const uel=document.createElement("div"); uel.className="msg user"; uel.innerHTML="<div class=avatar>You</div><div class=bubble><div class=msg-header><div class=name>ユーザー</div><div class=meta>"+escapeHtml(u.createdAt||"")+"</div></div><div class=md>"+mdToHtml(u.content||"")+"</div>"+((u.attachments&&u.attachments.length)?"<div class=attachments>"+u.attachments.map(renderAttach).join("")+"</div>":"")+"</div>"; chat.appendChild(uel); const per=map.get(u.id); const a=(per&&per.get)? per.get(current): null; if(a){ const tokens=Number((a.metadata&&a.metadata.tokensCount)||0); const cost=Number((a.metadata&&a.metadata.cost)||0); const r=Number((a.metadata&&a.metadata.reasoningDuration)||0); const sk=deriveKey(a, chars); const prov=(sk&&sk.split("/")[0])||""; const name=(chars[a.characterId]&&chars[a.characterId].modelInfo&&chars[a.characterId].modelInfo.short_name)||(chars[a.characterId]&&chars[a.characterId].modelInfo&&chars[a.characterId].modelInfo.name)||deriveKey(a, chars)||"assistant"; const ael=document.createElement("div"); ael.className="msg assistant"; ael.innerHTML="<div class=avatar>AI</div><div class=bubble><div class=msg-header><div class=name>"+escapeHtml(name)+"</div><div class=meta>"+escapeHtml(prov)+" ・ "+(tokens?(tokens.toLocaleString()+" tok"):"")+" ・ "+(cost?("$"+(Number(cost)||0).toFixed(6)):"")+" ・ "+(r?(((r||0)/1000).toFixed(1)+"s"):"")+"</div></div>"+(a.reasoning?"<div class=thinking><details><summary>Thinking を表示</summary><div class=note>内部思考（参考表示・初期は非表示）</div><div class=md>"+mdToHtml(a.reasoning)+"</div></details></div>":"")+"<div class=md>"+mdToHtml(a.content||"")+"</div>"+((a.attachments&&a.attachments.length)?"<div class=attachments>"+a.attachments.map(renderAttach).join("")+"</div>":"")+"</div>"; chat.appendChild(ael);} } }\n'
-    + 'select(current);}'
-    + 'window.addEventListener("DOMContentLoaded",function(){if(window.__EXPORTED_JSON__){render(window.__EXPORTED_JSON__);}});'
-    + '})();';
+  const STANDALONE_JS = `
+(function(){
+  "use strict";
+  var state = {};
+  function escapeHtml(s){var m={'&':'&amp;','<':'&lt;','>':'&gt;'}; m[String.fromCharCode(34)]='&quot;'; m[String.fromCharCode(39)]='&#39;'; return String(s).replace(/[&<>"']/g,function(c){return m[c];});}
+  function formatCost(n){return (Number(n)||0).toFixed(6);} function formatMs(ms){if(!ms) return ""; return (ms/1000).toFixed(1)+"s";}
+  function parseMime(d){var m=/^data:([^;,]+)[;,]/.exec(d||"");return m?m[1]:null;} function guessMime(n){if(/\\.pdf$/i.test(n))return"application/pdf"; if(/\\.(png|jpg|jpeg|gif|webp|svg)$/i.test(n))return "image/*"; return null;}
+  function deriveKey(msg,chars){return (msg.metadata&&msg.metadata.variantSlug) || (chars[msg.characterId]&&chars[msg.characterId].modelInfo&&chars[msg.characterId].modelInfo.slug) || (chars[msg.characterId]&&chars[msg.characterId].model) || null;}
+  function mdToHtml(md){try{var html=window.marked.parse(md||"",{mangle:false,headerIds:false});return DOMPurify.sanitize(html);}catch(e){return "<pre>"+escapeHtml(md||"")+"</pre>";}}
+  async function copyMd(text,btn){text=String(text||"");try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);}else{legacyCopy(text);}flash(btn);}catch(e){try{legacyCopy(text);flash(btn);}catch(_){}}}
+  function legacyCopy(text){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.top="-1000px";ta.style.left="-1000px";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");document.body.removeChild(ta);}
+  function flash(btn){if(!btn)return;var p=btn.innerHTML;btn.disabled=true;btn.innerHTML="<span class='copied'>✔</span>";setTimeout(function(){btn.innerHTML=p;btn.disabled=false;},1200);}
+  function renderAttach(a){var data=a.content||"";var name=a.name||"file";var mime=parseMime(data)||guessMime(name)||"application/octet-stream";if(mime.indexOf("image/")===0){return"<div class='attachment'><div>"+escapeHtml(name)+"</div><img src='"+data+"' alt='"+escapeHtml(name)+"'></div>";}if(mime==="application/pdf"){return"<div class='attachment'><details><summary>"+escapeHtml(name)+"（PDF プレビュー）</summary><object data='"+data+"' type='application/pdf'></object><div style='margin-top:6px'><a href='"+data+"' download='"+escapeHtml(name)+"'>ダウンロード</a></div></details></div>";}return"<div class='attachment'><div>"+escapeHtml(name)+"</div><a href='"+data+"' download='"+escapeHtml(name)+"'>ダウンロード</a></div>";}
+  function summarize(modelKey,msgs,chars){var totalCost=0,totalTokens=0,count=0,totalR=0;for(var i=0;i<msgs.length;i++){var m=msgs[i];if(m.type!=="assistant")continue;var k=deriveKey(m,chars);if(k!==modelKey)continue;count++;totalCost+=Number((m.metadata&&m.metadata.cost)||0)||0;totalTokens+=Number((m.metadata&&m.metadata.tokensCount)||0)||0;totalR+=Number((m.metadata&&m.metadata.reasoningDuration)||0)||0;}return{totalCost:totalCost,totalTokens:totalTokens,count:count,totalReasoningMs:totalR};}
+  var ICON_SVG = "<svg class='icon' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><rect x='9' y='9' width='13' height='13' rx='2' ry='2'></rect><path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'></path></svg>";
+  function render(json){ state.json=json; var chars=json.characters||{}; var all=Object.values(json.messages||{}); all.sort(function(a,b){var ta=Date.parse(a.createdAt||0)||0; var tb=Date.parse(b.createdAt||0)||0; if(ta!==tb) return ta-tb; return String(a.id).localeCompare(String(b.id));}); var users=all.filter(function(m){return m.type==="user"||m.characterId==="USER";}); var map=new Map(); var models=new Map(); for(var i=0;i<all.length;i++){var m=all[i]; if(m.type!=="assistant")continue; var pid=m.parentMessageId; if(!pid)continue; var k=deriveKey(m,chars); if(!k)continue; if(!map.has(pid)) map.set(pid,new Map()); map.get(pid).set(k,m); var char=chars[m.characterId]||{}; var info=char.modelInfo||{}; var ep=char.endpoint||{}; var slug=k; var prov=(slug&&slug.split("/")[0])||(ep.provider_name||"")||((m.metadata&&m.metadata.provider)||""); models.set(k,{key:k,name:info.name||k,shortName:info.short_name||k,provider:prov}); }
+    var list=document.getElementById("model-list"); list.innerHTML=""; var mlist=Array.from(models.values()).map(function(m){ return { key:m.key, name:m.name, shortName:m.shortName, provider:m.provider, summary:summarize(m.key, all, chars) }; }).sort(function(a,b){return a.name.localeCompare(b.name);}); var summaryEl=document.getElementById("model-summary"); var current=(mlist[0]&&mlist[0].key)||null; function paintSummary(){ var m=mlist.find(function(x){return x.key===current;}); if(!m){ summaryEl.textContent=""; return;} var s=m.summary; summaryEl.innerHTML="<div class='summary-grid'><div class='card'><div>総コスト</div><div><strong>$"+((Number(s.totalCost)||0).toFixed(6))+"</strong></div></div><div class='card'><div>トークン</div><div><strong>"+s.totalTokens.toLocaleString()+"</strong></div></div><div class='card'><div>応答数</div><div><strong>"+s.count+"</strong></div></div><div class='card'><div>推論時間</div><div><strong>"+(((s.totalReasoningMs||0)/1000).toFixed(1))+"s</strong></div></div></div>"; }
+    function select(k){ current=k; Array.from(list.querySelectorAll(".model-item")).forEach(function(li){ li.classList.toggle("selected", li.dataset.key===k); }); paintSummary(); paint(); }
+    for(const m of mlist){ var li=document.createElement("li"); li.className="model-item"; li.dataset.key=m.key; li.innerHTML="<div class='model-name'>"+escapeHtml(m.shortName||m.name)+"</div><div class='model-meta'>"+escapeHtml(m.provider||"")+"</div>"; li.onclick=function(){ select(m.key); }; list.appendChild(li); }
+    var chat=document.getElementById("chat"); function paint(){ chat.innerHTML=""; for(const u of users){ var uel=document.createElement("div"); uel.className="msg user"; uel.innerHTML="<div class='avatar'>You</div><div class='bubble'><div class='msg-header'><div class='name'>ユーザー</div><div class='meta-actions'><div class='meta'>"+escapeHtml(u.createdAt||"")+"</div><button class='copy-btn' type='button' aria-label='Markdownをコピー' title='Markdownをコピー'>"+ICON_SVG+"</button></div></div><div class='md'>"+mdToHtml(u.content||"")+"</div>"+((u.attachments&&u.attachments.length)?"<div class='attachments'>"+u.attachments.map(renderAttach).join("")+"</div>":"")+"</div>"; chat.appendChild(uel); var ub=uel.querySelector('.copy-btn'); if(ub){ ub.onclick=function(){ copyMd(String(u.content||""), ub); }; } var per=map.get(u.id); var a=(per&&per.get)? per.get(current): null; if(a){ var tokens=Number((a.metadata&&a.metadata.tokensCount)||0); var cost=Number((a.metadata&&a.metadata.cost)||0); var r=Number((a.metadata&&a.metadata.reasoningDuration)||0); var sk=deriveKey(a, chars); var prov=(sk&&sk.split("/")[0])||""; var name=(chars[a.characterId]&&chars[a.characterId].modelInfo&&chars[a.characterId].modelInfo.short_name)||(chars[a.characterId]&&chars[a.characterId].modelInfo&&chars[a.characterId].modelInfo.name)||deriveKey(a, chars)||"assistant"; var ael=document.createElement("div"); ael.className="msg assistant"; ael.innerHTML="<div class='avatar'>AI</div><div class='bubble'><div class='msg-header'><div class='name'>"+escapeHtml(name)+"</div><div class='meta-actions'><div class='meta'>"+escapeHtml(prov)+" ・ "+(tokens?(tokens.toLocaleString()+" tok"):"")+" ・ "+(cost?("$"+(Number(cost)||0).toFixed(6)):"")+" ・ "+(r?(((r||0)/1000).toFixed(1)+"s"):"")+"</div><button class='copy-btn' type='button' aria-label='Thinkingを除いたMarkdownをコピー' title='Thinkingを除いたMarkdownをコピー'>"+ICON_SVG+"</button></div></div>"+(a.reasoning?"<div class='thinking'><details><summary>Thinking を表示</summary><div class='note'>内部思考（参考表示・初期は非表示）</div><div class='md'>"+mdToHtml(a.reasoning)+"</div></details></div>":"")+"<div class='md'>"+mdToHtml(a.content||"")+"</div>"+((a.attachments&&a.attachments.length)?"<div class='attachments'>"+a.attachments.map(renderAttach).join("")+"</div>":"")+"</div>"; chat.appendChild(ael); var ab=ael.querySelector('.copy-btn'); if(ab){ ab.onclick=function(){ copyMd(String(a.content||""), ab); }; } } } }
+    select(current);
+  }
+  window.addEventListener("DOMContentLoaded",function(){
+    try{
+      var el=document.getElementById("data-json");
+      var txt=el? el.textContent || el.innerText || "" : "";
+      if(txt){ var json=JSON.parse(txt); render(json); }
+    }catch(e){ console.error(e); }
+  });
+})();
+`;
 
   // ----------------------------------------------------------
 

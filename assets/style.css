@@ -72,6 +72,14 @@ button:disabled{opacity:.5; cursor:not-allowed}
 .msg-header .name{font-weight:700}
 .msg-header .meta{color:var(--muted); font-size:12px}
 
+/* Meta area with copy button */
+.meta-actions{display:flex; align-items:center; gap:8px}
+.meta-actions .copy-btn{background:var(--chip); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center}
+.meta-actions .copy-btn:hover{outline:1px solid var(--brand)}
+.meta-actions .copy-btn:disabled{opacity:.6; cursor:not-allowed}
+.meta-actions .copy-btn .icon{display:block}
+.meta-actions .copy-btn .copied{font-weight:700; color:var(--accent); font-size:12px; line-height:1}
+
 .attachments{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
 .attachment{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:8px; max-width:100%}
 .attachment img{max-width:360px; height:auto; display:block; border-radius:6px}
